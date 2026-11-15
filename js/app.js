@@ -559,6 +559,7 @@
       store.set('lang', state.lang);
       renderStatic();
       renderDynamic();
+      document.dispatchEvent(new CustomEvent('flood:lang'));
     });
   });
 
@@ -612,4 +613,30 @@
   renderStatic();
   initMap();
   renderDynamic();
+
+  /* ---------- API для гида (js/guide.js) ---------- */
+  window.FloodApp = {
+    data: D,
+    dates: dates,
+    lastIdx: lastIdx,
+    get idx() { return state.idx; },
+    get lang() { return state.lang; },
+    t: t,
+    stateOf: stateOf,
+    postName: postName,
+    riverLabel: riverLabel,
+    river: river,
+    place: place,
+    fmtDate: fmtDate,
+    signed: signed,
+    isStale: function () {
+      var latest = D.posts.reduce(function (m, p) { return p.updated_at > m ? p.updated_at : m; }, D.generated_at || '');
+      return hoursAgo(latest) > STALE_HOURS;
+    },
+    select: function (id) {
+      select(id, {});
+      var target = window.innerWidth < 1020 ? $('#card') : $('.map-panel');
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 })();
