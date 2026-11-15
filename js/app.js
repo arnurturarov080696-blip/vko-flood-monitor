@@ -73,6 +73,7 @@
   function dmy(d, monthsKey, withYear) {
     var mon = t(monthsKey)[d.getMonth()];
     if (state.lang === 'kk') return (withYear ? d.getFullYear() + ' ж. ' : '') + d.getDate() + ' ' + mon;
+    if (state.lang === 'en') return d.getDate() + ' ' + mon + (withYear ? ' ' + d.getFullYear() : '');
     return d.getDate() + ' ' + mon + (withYear ? ' ' + d.getFullYear() + ' г.' : '');
   }
   function fmtDate(iso, long) { return dmy(parseDate(iso), 'months', long); }
@@ -82,9 +83,16 @@
     return dmy(d, 'months', false) + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
   }
   function signed(n) { return n > 0 ? '+' + n : n < 0 ? '−' + Math.abs(n) : '0'; }
-  function river(p) { return state.lang === 'kk' ? (p.river_kk || p.river) : p.river; }
-  function place(p) { return state.lang === 'kk' ? (p.place_kk || p.place) : p.place; }
-  function postName(p) { return (state.lang === 'kk' ? river(p) + ' өз.' : 'р. ' + river(p)) + ' — ' + place(p); }
+  // Поле на текущем языке (river_kk, place_en, source_en…), иначе русское.
+  function localized(o, field) { return (state.lang !== 'ru' && o[field + '_' + state.lang]) || o[field]; }
+  function river(p) { return localized(p, 'river'); }
+  function place(p) { return localized(p, 'place'); }
+  function riverLabel(p) {
+    if (state.lang === 'kk') return river(p) + ' өз.';
+    if (state.lang === 'en') return river(p) + ' River';
+    return 'р. ' + river(p);
+  }
+  function postName(p) { return riverLabel(p) + ' — ' + place(p); }
   function statusText(s) { return t('st_' + s); }
 
   /* ---------- Статичные тексты ---------- */
@@ -169,7 +177,7 @@
     var snow;
     if (D.snow && D.snow.pct != null) {
       snow = '<div class="value">' + D.snow.pct + '<small>%</small></div><div class="sub">' +
-        esc(t('kpi_snow_sub', { src: D.snow.source, d: fmtShort(D.snow.date) })) + '</div>';
+        esc(t('kpi_snow_sub', { src: localized(D.snow, 'source'), d: fmtShort(D.snow.date) })) + '</div>';
     } else {
       snow = '<div class="value">—</div><div class="sub">' + esc(t('no_data')) + '</div>';
     }
@@ -277,7 +285,7 @@
     var stale = hoursAgo(p.updated_at) > STALE_HOURS;
 
     el.innerHTML =
-      '<div class="card-head"><h2>' + esc(state.lang === 'kk' ? river(p) + ' өз.' : 'р. ' + river(p)) +
+      '<div class="card-head"><h2>' + esc(riverLabel(p)) +
         ' <span class="place">— ' + esc(place(p)) + '</span></h2>' +
         '<span class="badge badge-' + s.status + '">' + esc(statusText(s.status)) + '</span></div>' +
       '<div class="metrics">' +
@@ -488,7 +496,7 @@
       if (age < 0 || age > 2) return;
       list.push({
         sev: SEV[w.severity] || 1, kind: 'official', ts: w.issued_at,
-        source: state.lang === 'kk' ? (w.source_kk || w.source) : w.source, url: w.url,
+        source: localized(w, 'source'), url: w.url,
         text: (w.text && (w.text[state.lang] || w.text.ru)) || ''
       });
     });

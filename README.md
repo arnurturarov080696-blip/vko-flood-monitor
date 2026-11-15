@@ -1,6 +1,6 @@
 # Паводковая обстановка ВКО
 
-Статический сайт по [PRD.md](PRD.md): карта гидропостов (Leaflet + OpenStreetMap), сводка, карточка поста с графиком за 30 дней, сортируемая таблица, предупреждения, памятка и телефоны. Интерфейс на русском и казахском.
+Статический сайт по [PRD.md](PRD.md): карта гидропостов (Leaflet + OpenStreetMap), сводка, карточка поста с графиком за 30 дней, сортируемая таблица, предупреждения, памятка и телефоны. Интерфейс на русском, казахском и английском.
 
 ## Запуск
 
@@ -14,7 +14,7 @@ python3 -m http.server 8765
 
 - `index.html` — разметка
 - `css/style.css` — стили, адаптив под телефон
-- `js/i18n.js` — тексты RU/KK, телефоны, памятка
+- `js/i18n.js` — тексты RU/KK/EN, телефоны, памятка
 - `js/app.js` — логика: статусы, карта, график, таблица, предупреждения, ползунок дат
 - `data/data.js` — данные. Сейчас это генератор синтетических данных (демо)
 
@@ -26,11 +26,11 @@ python3 -m http.server 8765
 window.FLOOD_DATA = {
   demo: false,
   generated_at: "2027-04-10T08:00:00+05:00",
-  posts: [{ id, river, river_kk, place, place_kk, lon, lat, nya, crit,
+  posts: [{ id, river, river_kk, river_en, place, place_kk, place_en, lon, lat, nya, crit,
             series: [{ date: "YYYY-MM-DD", level_cm }],
             forecast: [{ date, level_cm }],   // только из официального прогноза
             peak_date, updated_at, source }],
-  official_warnings: [{ id, severity: "crit"|"nya"|"info", source, source_kk, url, issued_at, text: { ru, kk } }],
+  official_warnings: [{ id, severity: "crit"|"nya"|"info", source, source_kk, source_en, url, issued_at, text: { ru, kk, en } }],
   snow: { pct, date, source, url }          // можно не указывать
 };
 ```
@@ -39,5 +39,5 @@ window.FLOOD_DATA = {
 
 - Посты, координаты и пороги НЯ/ОЯ — сейчас синтетические, нужны данные Казгидромета.
 - Телефоны штаба ДЧС ВКО и акиматов районов (в `js/i18n.js` помечены «номер уточняется»).
-- Казахские тексты — вычитать носителю языка.
+- Казахские и английские тексты — вычитать носителям языка.
 - Ссылки на МЧС и Казгидромет — уточнить конкретные страницы.
